@@ -5,8 +5,8 @@ from pathlib import Path
 model = whisper.load_model("base")
 
 # Paths
-audio_path = Path("audio_input/sample_audio.mp3")
-output_path = Path("raw_transcripts/sample.txt")
+audio_path = Path(r"C:\Users\AMEERAH ADISA\Desktop\audio-to-notes-app\project\audio_input\december.mp3")
+output_path = Path(r"raw_transcripts/sample.txt")
 
 # Transcribe
 result = model.transcribe(str(audio_path))
