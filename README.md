@@ -1,1 +1,1 @@
-# audio-to-notes-app
+# audio-to-notes-app for TIC
