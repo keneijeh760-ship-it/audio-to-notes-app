@@ -443,4 +443,5 @@ def internal_error_handler(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)#   M i n o r   b a c k e n d   u p d a t e  
+ 
