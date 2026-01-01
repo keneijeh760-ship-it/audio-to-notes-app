@@ -1,19 +1,19 @@
-import whisper
 from pathlib import Path
+import whisper
 
-# Load model
-model = whisper.load_model("base")
+AUDIO = Path("audio_input/lecture.mp3")
+OUT = Path("raw_transcripts/lecture.txt")
 
-# Paths
-audio_path = Path(r"C:\Users\AMEERAH ADISA\Desktop\audio-to-notes-app\project\audio_input\december.mp3")
-output_path = Path(r"raw_transcripts/sample.txt")
+OUT.parent.mkdir(parents=True, exist_ok=True)
 
-# Transcribe
-result = model.transcribe(str(audio_path))
+model = whisper.load_model("medium", device="cpu")
+result = model.transcribe(str(AUDIO))
 
-# Save transcript
-output_path.parent.mkdir(exist_ok=True)
-with open(output_path, "w", encoding="utf-8") as f:
-    f.write(result["text"])
+with open(OUT, "w", encoding="utf-8") as f:
+    for s in result["segments"]:
+        f.write(
+            f"[{s['start']/60:.2f}-{s['end']/60:.2f} min] "
+            f"{s['text'].strip()}\n"
+        )
 
-print("Transcription complete.")
+print("Lecture transcript saved.")

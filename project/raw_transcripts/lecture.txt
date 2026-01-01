@@ -1,0 +1,43 @@
+[0.00 - 11.80] In today's video, we're going to take a look at potable water, which is what we call
+[11.80 - 17.72] water that's safe to drink. We'll also cover how we can get potable water by either treating
+[17.72 - 27.96] freshwater sources or desalinating seawater. Now although potable water is by definition
+[27.96 - 34.44] safe to drink, that doesn't mean that it's pure. In chemistry, pure water would have
+[34.44 - 42.16] to contain only H2O molecules, whereas potable water often contains other dissolved substances,
+[42.16 - 48.72] which makes it impure. This by itself isn't a problem, but there are three criteria for
+[48.72 - 54.48] water to meet before it can be considered potable. One is that the levels of dissolved
+[54.48 - 62.12] substances needs to be fairly low. Another is that it has to have a pH of between 6.5 and 8.5,
+[62.12 - 68.00] so that it's not too acidic or alkaline. And lastly, we have to make sure that there are
+[68.00 - 77.64] no microorganisms like bacteria or fungi swimming around in it. Next, we need to consider where you
+[77.64 - 82.80] actually get potable water from. Generally, this depends on where in the world you live.
+[82.80 - 88.68] Most countries have a pretty good supply of fresh water, which is just water that doesn't
+[88.68 - 95.08] have much dissolved in it. For example, in the UK, we get a fair bit of rain, which is a type of
+[95.08 - 101.84] fresh water. And once it's hit the ground, it generally collects as either surface water or
+[101.84 - 110.72] groundwater. Surface water sources are things like lakes, rivers and reservoirs, literally bodies
+[110.72 - 117.88] of water that are exposed at their surface. Groundwater sources, on the other hand, are those
+[117.88 - 123.64] found under the ground, like aquifers, which are areas of permeable rock under the ground that
+[123.64 - 132.20] trap water. The benefit of using surface water is that it's easy to access and gets replaced
+[132.20 - 139.08] frequently by the rain. However, if it's hot and sunny, it can dry up because it's exposed to the
+[139.08 - 148.40] sun. So in warmer parts of the UK, we often rely on groundwater instead. Whichever source we get
+[148.40 - 153.20] our fresh water from though, we still need to treat it to make sure that it's safe to drink.
+[153.20 - 160.96] The exact technique we use varies, but it generally involves three steps. First, we take our fresh
+[160.96 - 169.04] water and pass it through a wire mesh to filter out any big things like twigs. Next, we put
+[169.04 - 177.00] it through a bed of sand and gravel, which filters out any other smaller solid bits. And finally,
+[177.00 - 183.12] we have to sterilise it to kill any harmful microbes like bacteria, which we can do in
+[183.12 - 190.48] three ways. Either bubbling chlorine gas through it or exposing it to ozone or ultraviolet light.
+[190.48 - 199.00] In some countries though, like those in the Middle East, there isn't very much rain,
+[199.00 - 206.92] and so they don't have very good supplies of fresh water. Instead, some of them rely on desalination,
+[206.92 - 214.60] which is a technique used to extract potable water from seawater. This sounds like a great idea,
+[214.60 - 221.20] because there's tons of seawater, so basically a limitless supply. Unfortunately though,
+[221.20 - 226.64] both of the techniques that we currently use, namely distillation and reverse osmosis,
+[226.64 - 233.80] require loads of energy and so really expensive, which makes them kind of impractical for producing
+[233.80 - 241.52] large quantities of water. In order to desalinate water by distillation, we basically just do the
+[241.52 - 247.28] same thing as in simple distillation, like you've seen in school, except we're boiling much larger
+[247.28 - 254.48] quantities of salty water, and the apparatus will look different. Regardless though, we still collect
+[254.48 - 262.20] the water vapour and condense it to give us pure distilled water. On the other hand, in the reverse
+[262.20 - 268.40] osmosis technique, the salty water is passed through a membrane, which only allows the water
+[268.40 - 274.20] molecules to pass through. This means that all of the ions and larger molecules get trapped,
+[274.20 - 279.68] and so separated from the water. So again, we end up with pure distilled water.
+[284.52 - 291.40] If you haven't heard yet, you can find all of our videos on our website, cognito.org. You'll
+[291.44 - 298.64] also find questions, flashcards, exam style questions and pass papers, and we track all of
+[298.64 - 304.20] your progress so that you always know what to study next. So sign up for free by clicking here,
+[304.20 - 306.68] or browse our playlist here on YouTube.
