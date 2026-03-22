@@ -1,52 +1,62 @@
-#Engineer 4, integrate the NLP summarizer
-
-
 from fastapi import APIRouter, HTTPException
-import json
-import os
 import uuid
 from datetime import datetime
-from project.backend.models.schemas import SummarizeRequest
-from project.backend.storage.file_manager import TRANSCRIPTS_DIR, SUMMARIES_DIR
+import os
+from groq import Groq
 
+from project.backend.models.schemas import SummarizeRequest
+from project.backend.supabase_service import supabase
 
 router = APIRouter()
 
-def generate_id():
-    return str(uuid.uuid4())
-
-def get_timestamp():
-    return datetime.now().isoformat()
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 @router.post("/summarize")
-def summarize_transcript(request: SummarizeRequest):
+def summarize(request: SummarizeRequest):
 
-    transcript_file = os.path.join(
-        TRANSCRIPTS_DIR,
-        f"{request.transcript_id}.json"
+    transcript = supabase.table("transcripts").select("*").eq("id", request.transcript_id).execute()
+
+    if not transcript.data:
+        raise HTTPException(404, "Transcript not found")
+
+    text = transcript.data[0]["transcript_text"]
+
+    # 🔥 Groq AI summarization
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an expert note-taking assistant. Summarize clearly into concise bullet points."
+            },
+            {
+                "role": "user",
+                #"content": f"Summarize this transcript into clear notes:\n\n{text}"
+                "content": f"Summarize this transcript into 5-7 concise bullet points. Keep it under 120 words. Focus only on key ideas:\n\n{text}"
+            }
+        ],
+        temperature=0.3
     )
 
-    if not os.path.exists(transcript_file):
-        raise HTTPException(status_code=404, detail="Transcript not found")
+    summary = response.choices[0].message.content
 
-    with open(transcript_file) as f:
-        transcript = json.load(f)
+    word_count = len(summary.split())
 
-    summary_id = generate_id()
+    summary_id = str(uuid.uuid4())
 
-    summary_data = {
-        "summary_id": summary_id,
+    supabase.table("summaries").insert({
+        "id": summary_id,
         "transcript_id": request.transcript_id,
-        "summary_text": "Simulated summary",
-        "timestamp": get_timestamp()
-    }
-
-    summary_file = os.path.join(SUMMARIES_DIR, f"{summary_id}.json")
-
-    with open(summary_file, "w") as f:
-        json.dump(summary_data, f, indent=2)
+        "summary_text": summary,
+        "key_points": [],
+        "entities": [],
+        "word_count": word_count,
+        "created_at": datetime.utcnow().isoformat()
+    }).execute()
 
     return {
         "success": True,
-        "data": summary_data
+        "summary_id": summary_id,
+        "summary": summary,
+        "word_count": word_count
     }

@@ -1,46 +1,43 @@
-#Engineer 2
-
 from fastapi import APIRouter, UploadFile, File, HTTPException
-import os
 import uuid
 from datetime import datetime
-from project.backend.storage.file_manager import UPLOAD_DIR
-
+from project.backend.supabase_service import supabase
+from project.backend.config.settings import AUDIO_BUCKET
+from project.backend.services.metrics_service import update_metrics
 
 router = APIRouter()
 
-processing_status = {}
-
-def generate_id():
-    return str(uuid.uuid4())
-
-def get_timestamp():
-    return datetime.now().isoformat()
-
 @router.post("/upload-audio")
-def upload_audio(file: UploadFile = File(...)):
+async def upload_audio(file: UploadFile = File(...)):
+    allowed = ['.mp3', '.wav', '.m4a', '.ogg', '.flac']
     
-    allowed_extensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac']
-    file_ext = os.path.splitext(file.filename)[1].lower()
+    if not any(file.filename.endswith(ext) for ext in allowed):
+        raise HTTPException(400, "Invalid file type")
 
-    if file_ext not in allowed_extensions:
-        raise HTTPException(status_code=400, detail="Invalid file type")
+    file_id = str(uuid.uuid4())
+    file_bytes = await file.read()
 
-    file_id = generate_id()
-    file_path = os.path.join(UPLOAD_DIR, f"{file_id}{file_ext}")
+    path = f"{file_id}_{file.filename}"
 
-    content = file.file.read()
+    # Upload to Supabase storage
+    supabase.storage.from_(AUDIO_BUCKET).upload(path, file_bytes)
 
-    with open(file_path, "wb") as f:
-        f.write(content)
+    file_url = supabase.storage.from_(AUDIO_BUCKET).get_public_url(path)
 
-    processing_status[file_id] = {
-        "status": "uploaded",
+    # Insert metadata
+    supabase.table("uploads").insert({
+        "id": file_id,
         "filename": file.filename,
-        "upload_timestamp": get_timestamp()
-    }
+        "file_url": file_url,
+        "file_size": len(file_bytes),
+        "status": "uploaded",
+        "upload_time": datetime.utcnow().isoformat()
+    }).execute()
+
+    update_metrics("total_uploads", 1)
 
     return {
         "success": True,
-        "file_id": file_id
+        "file_id": file_id,
+        "file_url": file_url
     }

@@ -1,19 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
-# Import routers
 from project.backend.api.upload import router as upload_router
 from project.backend.api.transcribe import router as transcribe_router
 from project.backend.api.summarize import router as summarize_router
 from project.backend.api.notes import router as notes_router
+from project.backend.api.status import router as status_router
+from project.backend.api.metrics import router as metrics_router
 
-app = FastAPI(
-    title="Audio Notes API",
-    description="Audio transcription and note summarization system",
-    version="1.0"
-)
 
-# CORS (frontend communication)
+app = FastAPI(title="Audio Notes API", version="2.0")
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,22 +21,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Root endpoint
+# Global error handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "error": str(exc)}
+    )
+
 @app.get("/")
 def root():
     return {
-        "message": "Audio Notes API is running",
-        "version": "1.0",
-        "status": "healthy"
+        "success": True,
+        "message": "API Running",
+        "services": ["upload", "transcribe", "summarize", "notes"]
     }
 
-@app.get("/routes")
-def routes():
-    return [route.path for route in app.routes]
-
-
-# Connect routers
+# Routers
 app.include_router(upload_router)
 app.include_router(transcribe_router)
 app.include_router(summarize_router)
 app.include_router(notes_router)
+app.include_router(status_router)
+app.include_router(metrics_router)

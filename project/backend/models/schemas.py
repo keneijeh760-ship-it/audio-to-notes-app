@@ -1,7 +1,5 @@
-#Engineer 6
-
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 class TranscribeRequest(BaseModel):
     audio_file_id: str
@@ -9,7 +7,6 @@ class TranscribeRequest(BaseModel):
 
 class SummarizeRequest(BaseModel):
     transcript_id: str
-    summary_type: Optional[str] = "standard"
 
 class SaveNotesRequest(BaseModel):
     transcript_id: str
@@ -18,6 +15,6 @@ class SaveNotesRequest(BaseModel):
 
 class APIResponse(BaseModel):
     success: bool
-    message: str
+    message: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
     error: Optional[str] = None

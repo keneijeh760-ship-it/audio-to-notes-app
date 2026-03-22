@@ -1,41 +1,36 @@
-#Engineer 5 implement the logic.
-
 from fastapi import APIRouter
-import json
-import os
 import uuid
 from datetime import datetime
 from project.backend.models.schemas import SaveNotesRequest
-from project.backend.storage.file_manager import NOTES_DIR
-
+from project.backend.supabase_service import supabase
 
 router = APIRouter()
-
-def generate_id():
-    return str(uuid.uuid4())
-
-def get_timestamp():
-    return datetime.now().isoformat()
 
 @router.post("/save-notes")
 def save_notes(request: SaveNotesRequest):
 
-    note_id = generate_id()
+    note_id = str(uuid.uuid4())
 
-    notes_data = {
-        "note_id": note_id,
+    data = {
+        "id": note_id,
         "transcript_id": request.transcript_id,
         "summary_id": request.summary_id,
-        "created_at": get_timestamp(),
-        "user_notes": request.user_notes
+        "user_notes": request.user_notes,
+        "created_at": datetime.utcnow().isoformat()
     }
 
-    note_file = os.path.join(NOTES_DIR, f"{note_id}.json")
+    supabase.table("notes").insert(data).execute()
 
-    with open(note_file, "w") as f:
-        json.dump(notes_data, f, indent=2)
+    return {"success": True, "data": data}
 
-    return {
-        "success": True,
-        "data": notes_data
-    }
+
+@router.get("/notes")
+def get_notes():
+    notes = supabase.table("notes").select("*").execute()
+    return {"success": True, "data": notes.data}
+
+
+@router.get("/notes/{note_id}")
+def get_note(note_id: str):
+    note = supabase.table("notes").select("*").eq("id", note_id).execute()
+    return {"success": True, "data": note.data}
