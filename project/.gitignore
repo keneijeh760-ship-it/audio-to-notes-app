@@ -1,4 +1,5 @@
 # Python virtual environment
+.env
 venv/
 
 # Python cache files
@@ -22,3 +23,4 @@ __pycache__/
 # Transcripts or other output files you don't want to track
 raw_transcripts/
 cleaned_lecture.txt
+
