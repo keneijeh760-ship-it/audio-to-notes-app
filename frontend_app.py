@@ -84,20 +84,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize session state
-if 'file_id' not in st.session_state:
-    st.session_state.file_id = None
-if 'transcript_id' not in st.session_state:
-    st.session_state.transcript_id = None
-if 'summary_id' not in st.session_state:
-    st.session_state.summary_id = None
-if 'note_id' not in st.session_state:
-    st.session_state.note_id = None
-if 'transcript_data' not in st.session_state:
-    st.session_state.transcript_data = None
-if 'summary_data' not in st.session_state:
-    st.session_state.summary_data = None
-if 'processing_stage' not in st.session_state:
-    st.session_state.processing_stage = "upload"
+for key, default in {
+    "access_token": None,
+    "user_info": None,
+    "file_id": None,
+    "transcript_id": None,
+    "summary_id": None,
+    "note_id": None,
+    "transcript_data": None,
+    "summary_data": None,
+    "processing_stage": "upload",
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
+
+
+def _auth_headers():
+    """Return Authorization header dict if the user is logged in."""
+    token = st.session_state.get("access_token")
+    if token:
+        return {"Authorization": f"Bearer {token}"}
+    return {}
 
 # Helper functions
 def check_api_health():
@@ -108,11 +115,44 @@ def check_api_health():
     except:
         return False
 
+def signup_user(name, email, password):
+    """Register a new user via the backend."""
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/auth/signup",
+            json={"name": name, "email": email, "password": password},
+        )
+        return response.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def login_user(email, password):
+    """Authenticate a user via the backend."""
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/auth/login",
+            json={"email": email, "password": password},
+        )
+        return response.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def logout_user():
+    """Log out the current user via the backend."""
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/auth/logout",
+            headers=_auth_headers(),
+        )
+        return response.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 def upload_audio_file(file):
     """Upload audio file to backend"""
     try:
         files = {'file': (file.name, file, file.type)}
-        response = requests.post(f"{API_BASE_URL}/upload-audio", files=files)
+        response = requests.post(f"{API_BASE_URL}/upload-audio", files=files, headers=_auth_headers())
         return response.json()
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -122,7 +162,8 @@ def transcribe_audio(file_id):
     try:
         response = requests.post(
             f"{API_BASE_URL}/transcribe",
-            json={"audio_file_id": file_id}
+            json={"audio_file_id": file_id},
+            headers=_auth_headers(),
         )
         return response.json()
     except Exception as e:
@@ -133,7 +174,8 @@ def summarize_transcript(transcript_id):
     try:
         response = requests.post(
             f"{API_BASE_URL}/summarize",
-            json={"transcript_id": transcript_id}
+            json={"transcript_id": transcript_id},
+            headers=_auth_headers(),
         )
         return response.json()
     except Exception as e:
@@ -148,7 +190,8 @@ def save_notes(transcript_id, summary_id, user_notes=""):
                 "transcript_id": transcript_id,
                 "summary_id": summary_id,
                 "user_notes": user_notes
-            }
+            },
+            headers=_auth_headers(),
         )
         return response.json()
     except Exception as e:
@@ -157,7 +200,7 @@ def save_notes(transcript_id, summary_id, user_notes=""):
 def get_saved_notes(note_id):
     """Retrieve saved notes"""
     try:
-        response = requests.get(f"{API_BASE_URL}/notes/{note_id}")
+        response = requests.get(f"{API_BASE_URL}/notes/{note_id}", headers=_auth_headers())
         return response.json()
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -165,7 +208,7 @@ def get_saved_notes(note_id):
 def list_all_notes():
     """List all saved notes"""
     try:
-        response = requests.get(f"{API_BASE_URL}/notes")
+        response = requests.get(f"{API_BASE_URL}/notes", headers=_auth_headers())
         return response.json()
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -196,9 +239,77 @@ KEY POINTS
 st.title("🎙️ Audio Notes - Transcription & Summarization")
 st.markdown("Transform your audio recordings into organized, searchable notes")
 
+# ──────────────────────────────────────
+# Auth gate: show login/signup when not authenticated
+# ──────────────────────────────────────
+if st.session_state.access_token is None:
+    auth_tab_login, auth_tab_signup = st.tabs(["Login", "Sign Up"])
+
+    with auth_tab_login:
+        st.subheader("Login to your account")
+        login_email = st.text_input("Email", key="login_email")
+        login_password = st.text_input("Password", type="password", key="login_password")
+        if st.button("Login", key="login_btn"):
+            if not login_email or not login_password:
+                st.error("Please enter both email and password.")
+            else:
+                with st.spinner("Logging in..."):
+                    result = login_user(login_email, login_password)
+                if result.get("success"):
+                    st.session_state.access_token = result["data"]["access_token"]
+                    st.session_state.user_info = {
+                        "user_id": result["data"]["user_id"],
+                        "email": result["data"]["email"],
+                        "name": result["data"].get("name", ""),
+                    }
+                    st.rerun()
+                else:
+                    st.error(f"Login failed: {result.get('error', 'Unknown error')}")
+
+    with auth_tab_signup:
+        st.subheader("Create a new account")
+        signup_name = st.text_input("Name", key="signup_name")
+        signup_email = st.text_input("Email", key="signup_email")
+        signup_password = st.text_input("Password", type="password", key="signup_password")
+        if st.button("Sign Up", key="signup_btn"):
+            if not signup_name or not signup_email or not signup_password:
+                st.error("Please fill in all fields.")
+            else:
+                with st.spinner("Creating account..."):
+                    result = signup_user(signup_name, signup_email, signup_password)
+                if result.get("success"):
+                    token = result["data"].get("access_token")
+                    if token:
+                        st.session_state.access_token = token
+                        st.session_state.user_info = {
+                            "user_id": result["data"]["user_id"],
+                            "email": result["data"]["email"],
+                            "name": result["data"].get("name", ""),
+                        }
+                        st.rerun()
+                    else:
+                        st.success("Account created! Please check your email to confirm, then log in.")
+                else:
+                    st.error(f"Sign-up failed: {result.get('error', 'Unknown error')}")
+
+    st.stop()
+
+# ──────────────────────────────────────
+# Authenticated UI below
+# ──────────────────────────────────────
+
 # Sidebar
 with st.sidebar:
     st.header("📋 Navigation")
+
+    user_name = st.session_state.user_info.get("name") or st.session_state.user_info.get("email", "")
+    st.markdown(f"**Logged in as:** {user_name}")
+    if st.button("Logout", key="logout_btn"):
+        logout_user()
+        st.session_state.access_token = None
+        st.session_state.user_info = None
+        st.rerun()
+
     page = st.radio(
         "Select Page",
         ["Upload & Process", "View Saved Notes", "API Documentation"],

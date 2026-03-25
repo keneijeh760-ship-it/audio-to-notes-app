@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+aiofiles
+python-multipart
+pydantic
+supabase
+python-dotenv
+streamlit
+requests
